@@ -60,7 +60,7 @@
                                         top: slot.top,
                                         left: slot.left + block.width,
                                         availableWidth: slot.availableWidth - block.width,
-                                        availableHeight: block.availableHeight
+                                        availableHeight: block.height
                                     }
                                 ]).concat(slots.slice(slotIndex + 1));
                             }
