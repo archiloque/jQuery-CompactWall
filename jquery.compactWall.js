@@ -20,6 +20,7 @@
         var BlocksPosition = function (positionedBlocks, slots, height, containerWith) {
             this.positionedBlocks = positionedBlocks;
             this.height = height;
+            this.slots = slots;
             // slots represents position that can be occupied by blocks
             // they are sorted from left to right
 

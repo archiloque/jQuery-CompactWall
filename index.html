@@ -20,8 +20,9 @@
         }
         .block {
             border: 1px #AAAAAA solid;
-            border-radius: 5px;
-            margin: 4px;
+            display: inline-block;
+            word-spacing: normal;
+            padding: 4px;
         }
 
         .exampleItem {
@@ -29,10 +30,11 @@
         }
 
         .example, .compactExample {
-            margin: 5px;
-            border: 1px #AAAAAA solid;
+            border: 1px #EEEEEE solid;
             display: inline-block;
             vertical-align: top;
+            margin-bottom: 5px;
+            word-spacing: -1em;
         }
     </style>
     <script type="text/javascript">
@@ -97,8 +99,8 @@ to specify their size in the css.
 <div>
 <div id="example2" style="width: 200px;" class="example">
     <div class="block" style="width: 90px;height: 90px;">1</div>
-    <div class="block" style="width: 90px;height: 90px;">2</div>
-    <div class="block" style="width: 90px;height: 190px;"3></div>
+    <div class="block" style="width: 90px;height: 190px;">2</div>
+    <div class="block" style="width: 90px;height: 90px;">3</div>
 </div>
 </div>
 
