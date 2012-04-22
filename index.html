@@ -29,10 +29,12 @@
             display: inline-block;
         }
 
+        td {
+            vertical-align: top;
+        }
+
         .example, .compactExample {
             border: 1px #EEEEEE solid;
-            display: inline-block;
-            vertical-align: top;
             margin-bottom: 5px;
             word-spacing: -1em;
         }
@@ -42,12 +44,12 @@
             $.each($(".example"), function(index, example){
                 var example = $(example);
                 var id = example.attr('id');
-                var compact = '<div class="compactExample" id="' + id + '_" style="width:' + example.css('width') + '">' + example.html() + '</div>';
-                var html = "<pre class='prettyprint lang-html exampleItem'>" +
+                var compact = '<td><div class="compactExample" id="' + id + '_" style="width:' + example.css('width') + '">' + example.html() + '</div></td>';
+                var html = "<td><pre class='prettyprint lang-html exampleItem'>" +
                         example.parent().html().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") +
-                        "</pre>";
-                example.parent().append(html);
-                example.parent().append(compact);
+                        "</pre></td>";
+                example.parent().parent().append(html);
+                example.parent().parent().append(compact);
             });
             $.each($('.compactExample'), function(index, example) {
                $(example).compactWall($(example).children('.block'));
@@ -89,22 +91,22 @@ to specify their size in the css.
 
 <h1>Examples</h1>
 
-<div>
+<table><tr><td>
 <div id="example1" style="width: 200px;" class="example">
     <div class="block" style="width: 90px;height: 90px;">1</div>
     <div class="block" style="width: 90px;height: 90px;">2</div>
 </div>
-</div>
+</td></tr></table>
 
-<div>
-<div id="example2" style="width: 200px;" class="example">
+<table><tr><td>
+    <div id="example2" style="width: 200px;" class="example">
     <div class="block" style="width: 90px;height: 90px;">1</div>
     <div class="block" style="width: 90px;height: 190px;">2</div>
     <div class="block" style="width: 90px;height: 90px;">3</div>
 </div>
-</div>
+</td></tr></table>
 
-<div>
+<table><tr><td>
 <div id="example3" style="width: 250px;" class="example">
     <div class="block" style="width: 90px;height: 90px;">1</div>
     <div class="block" style="width: 140px;height: 140px;">2</div>
@@ -112,9 +114,9 @@ to specify their size in the css.
     <div class="block" style="width: 140px;height: 90px;">4</div>
     <div class="block" style="width: 190px;height: 90px;">5</div>
 </div>
-</div>
+</td></tr></table>
 
-<div>
+<table><tr><td>
 <div id="example4" style="width: 300px;" class="example">
     <div class="block" style="width: 90px;height: 140px;">1</div>
     <div class="block" style="width: 90px;height: 90px;">2</div>
@@ -122,7 +124,15 @@ to specify their size in the css.
     <div class="block" style="width: 40px;height: 40px;">4</div>
     <div class="block" style="width: 40px;height: 40px;">5</div>
 </div>
+</td></tr></table>
+
+<table><tr><td>
+    <div id="example5" style="width: 200px;" class="example">
+    <div class="block" style="width: 90px;height: 90px;">1</div>
+    <div class="block" style="width: 90px;height: 90px;">2</div>
+    <div class="block" style="width: 90px;height: 190px;">3</div>
 </div>
+</td></tr></table>
 
 <h1>License</h1>
 
