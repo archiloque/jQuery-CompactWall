@@ -25,15 +25,120 @@
             // slots represents position where blocks can be placed
             // they are sorted from left to right
 
+            this.sameHeightSameWidth = function (slotIndex) {
+                return slots.slice(0, slotIndex)
+                    .concat(slots.slice(slotIndex + 1));
+            };
+
+            this.sameHeightNarrower = function (slotIndex, slot, block) {
+                if ((slots.length > (slotIndex + 1)) &&
+                    (slots[slotIndex + 1].left == (slot.left + block.width)) &&
+                    (slots[slotIndex + 1].availableWidth == (slot.availableWidth - block.width))) {
+                    // wannabe new position is aligned with the next slot
+                    // this design could have been reached by another organisation
+                    // but visually it is interesting
+                    return slots.slice(0, slotIndex)
+                        .concat([
+                        {
+                            top: slots[slotIndex + 1].top,
+                            left: slots[slotIndex + 1].left,
+                            availableWidth: slots[slotIndex + 1].availableWidth,
+                            availableHeight: (slots[slotIndex + 1].availableHeight + block.height)
+                        }
+                    ]).concat(slots.slice(slotIndex + 2));
+                } else {
+                    return slots.slice(0, slotIndex)
+                        .concat([
+                        {
+                            top: slot.top,
+                            left: slot.left + block.width,
+                            availableWidth: (slot.availableWidth - block.width),
+                            availableHeight: block.height
+                        }
+                    ]).concat(slots.slice(slotIndex + 1));
+                }
+            };
+
+            this.smallerSameWidth = function (slotIndex, slot, block) {
+                return slots.slice(0, slotIndex)
+                    .concat([
+                    {
+                        top: slot.top + block.height,
+                        left: slot.left,
+                        availableWidth: slot.availableWidth,
+                        availableHeight: (slot.availableHeight - block.height)
+                    }
+                ]).concat(slots.slice(slotIndex + 1));
+            };
+
+            this.smallerNarrower = function (slotIndex, slot, block) {
+                if ((slots.length > (slotIndex + 1)) &&
+                    (slots[slotIndex + 1].left == (slot.left + block.width)) &&
+                    (slots[slotIndex + 1].availableWidth == (slot.availableWidth - block.width))) {
+                    // wannabe new slot is aligned with the next slot
+                    // this design could have been reached by another organisation
+                    // but visually it is interesting
+                    if (slotIndex == 0) {
+                        // the current slot is the first one
+                        // move it to the bottom and increase height of next one
+                        return [
+                            {
+                                top: slot.top + block.height,
+                                left: 0,
+                                availableWidth: slot.availableWidth,
+                                availableHeight: Number.Infinity
+                            },
+                            {
+                                top: slots[slotIndex + 1].top,
+                                left: slots[slotIndex + 1].left,
+                                availableWidth: slots[slotIndex + 1].availableWidth,
+                                availableHeight: (slots[slotIndex + 1].availableHeight + block.height)
+                            }
+                        ].concat(slots.slice(slotIndex + 2));
+                    } else {
+                        // current slot is not the first one
+                        // increase the size of next one
+                        return slots.slice(0, slotIndex)
+                            .concat([
+                            {
+                                top: slots[slotIndex + 1].top,
+                                left: slots[slotIndex + 1].left,
+                                availableWidth: slots[slotIndex + 1].availableWidth,
+                                availableHeight: (slots[slotIndex + 1].availableHeight + block.height)
+                            }
+                        ]).concat(slots.slice(slotIndex + 2));
+                    }
+                } else {
+                    return slots.slice(0, slotIndex)
+                        .concat([
+                        {
+                            top: slot.top + block.height,
+                            left: slot.left,
+                            availableWidth: slot.availableWidth,
+                            availableHeight: (slot.availableHeight - block.height)
+                        },
+                        {
+                            top: slot.top,
+                            left: slot.left + block.width,
+                            availableWidth: (slot.availableWidth - block.width),
+                            availableHeight: block.height
+                        }
+                    ]).concat(slots.slice(slotIndex + 1));
+                }
+            };
+
             /**
              * Add a block to this position
              * @param block the block to add
              * @maxHeight the max height we want to reach
-             * @param callback the callback to be called with the new positions.
              */
-            this.addBlock = function (block, maxHeight, callback) {
-                if (height < maxHeight) {
-                    $.each(slots, function (slotIndex, slot) {
+            this.addBlock = function (block, maxHeight) {
+                if (height >= maxHeight) {
+                    return [];
+                } else {
+                    var result = [];
+                    for (var slotIndex = 0; slotIndex < slots.length; slotIndex++) {
+                        var slot = slots[slotIndex];
                         if (((slot.top + block.height) < maxHeight) &&
                             (slot.availableWidth >= block.width) &&
                             (slot.availableHeight >= block.height)) {
@@ -50,117 +155,30 @@
                                 // the block has the same height than the slot
                                 if (slot.availableWidth == block.width) {
                                     // same height and same width: we kill the slot
-                                    newSlots = slots.slice(0, slotIndex)
-                                        .concat(slots.slice(slotIndex + 1));
-
+                                    newSlots = this.sameHeightSameWidth(slotIndex);
                                 } else {
                                     // same height but narrower : we move the slot to the right
-                                    if ((slots.length > (slotIndex + 1)) &&
-                                        (slots[slotIndex + 1].left == (slot.left + block.width)) &&
-                                        (slots[slotIndex + 1].availableWidth == (slot.availableWidth - block.width))) {
-                                        // wannabe new position is aligned with the next slot
-                                        // this design could have been reached by another organisation
-                                        // but visually it is interesting
-                                        newSlots = slots.slice(0, slotIndex)
-                                            .concat([
-                                            {
-                                                top: slots[slotIndex + 1].top,
-                                                left: slots[slotIndex + 1].left,
-                                                availableWidth: slots[slotIndex + 1].availableWidth,
-                                                availableHeight: (slots[slotIndex + 1].availableHeight + block.height)
-                                            }
-                                        ]).concat(slots.slice(slotIndex + 2));
-                                    } else {
-                                        newSlots = slots.slice(0, slotIndex)
-                                            .concat([
-                                            {
-                                                top: slot.top,
-                                                left: slot.left + block.width,
-                                                availableWidth: (slot.availableWidth - block.width),
-                                                availableHeight: block.height
-                                            }
-                                        ]).concat(slots.slice(slotIndex + 1));
-                                    }
+                                    newSlots = this.sameHeightNarrower(slotIndex, slot, block);
                                 }
                             } else {
                                 // the blocks is smaller
                                 if (block.width == slot.availableWidth) {
                                     // same width but smaller : we move the slot to the bottom
-                                    newSlots = slots.slice(0, slotIndex)
-                                        .concat([
-                                        {
-                                            top: slot.top + block.height,
-                                            left: slot.left,
-                                            availableWidth: slot.availableWidth,
-                                            availableHeight: (slot.availableHeight - block.height)
-                                        }
-                                    ]).concat(slots.slice(slotIndex + 1));
+                                    newSlots = this.smallerSameWidth(slotIndex, slot, block);
                                 } else {
                                     // smaller width and smaller height: we move the slot to the bottom
                                     // and add another slot for the upper right corner of the block
-                                    if ((slots.length > (slotIndex + 1)) &&
-                                        (slots[slotIndex + 1].left == (slot.left + block.width)) &&
-                                        (slots[slotIndex + 1].availableWidth == (slot.availableWidth - block.width))) {
-                                        // wannabe new slot is aligned with the next slot
-                                        // this design could have been reached by another organisation
-                                        // but visually it is interesting
-                                        if (slotIndex == 0) {
-                                            // the current slot is the first one
-                                            // move it to the bottom and increase height of next one
-                                            newSlots = [
-                                                {
-                                                    top: slot.top + block.height,
-                                                    left: 0,
-                                                    availableWidth: slot.availableWidth,
-                                                    availableHeight: Number.Infinity
-                                                },
-                                                {
-                                                    top: slots[slotIndex + 1].top,
-                                                    left: slots[slotIndex + 1].left,
-                                                    availableWidth: slots[slotIndex + 1].availableWidth,
-                                                    availableHeight: (slots[slotIndex + 1].availableHeight + block.height)
-                                                }
-                                            ].concat(slots.slice(slotIndex + 2));
-                                        } else {
-                                            // current slot is not the first one
-                                            // increase the size of next one
-                                            newSlots = slots.slice(0, slotIndex)
-                                                .concat([
-                                                {
-                                                    top: slots[slotIndex + 1].top,
-                                                    left: slots[slotIndex + 1].left,
-                                                    availableWidth: slots[slotIndex + 1].availableWidth,
-                                                    availableHeight: (slots[slotIndex + 1].availableHeight + block.height)
-                                                }
-                                            ]).concat(slots.slice(slotIndex + 2));
-                                        }
-                                    } else {
-                                        newSlots = slots.slice(0, slotIndex)
-                                            .concat([
-                                            {
-                                                top: slot.top + block.height,
-                                                left: slot.left,
-                                                availableWidth: slot.availableWidth,
-                                                availableHeight: (slot.availableHeight - block.height)
-                                            },
-                                            {
-                                                top: slot.top,
-                                                left: slot.left + block.width,
-                                                availableWidth: (slot.availableWidth - block.width),
-                                                availableHeight: block.height
-                                            }
-                                        ]).concat(slots.slice(slotIndex + 1));
-                                    }
+                                    newSlots = this.smallerNarrower(slotIndex, slot, block);
                                 }
                             }
-
-                            callback(new BlocksPosition(
+                            result.push(new BlocksPosition(
                                 positionedBlocks.concat([positionedBlock]),
                                 newSlots,
                                 Math.max(height, slot.top + block.height),
                                 containerWith));
                         }
-                    });
+                    }
+                    return result;
                 }
             }
         };
@@ -185,13 +203,14 @@
             } else {
                 var bestPosition = null;
                 var minHeight = maxHeight;
-                $.each(remainingBlocks, function (index, block) {
+                for (var index = 0; index < remainingBlocks.length; index++) {
+                    var block = remainingBlocks[index];
                     var bestPositionCandidate = nextFitNextBlock(remainingBlocks, block, index, position, maxHeight);
                     if (bestPositionCandidate && (bestPositionCandidate.height < minHeight)) {
                         minHeight = bestPositionCandidate.height;
                         bestPosition = bestPositionCandidate;
                     }
-                });
+                }
                 return bestPosition;
             }
         };
@@ -202,12 +221,14 @@
         var bestFitLastBlock = function (remainingBlock, position, maxHeight) {
             var bestPosition = null;
             var minHeight = maxHeight;
-            position.addBlock(remainingBlock, minHeight, function (newPosition) {
+            var positions = position.addBlock(remainingBlock, minHeight);
+            for (var i = 0; i < positions.length; i++) {
+                var newPosition = positions[i];
                 if (newPosition.height < minHeight) {
                     minHeight = newPosition.height;
                     bestPosition = newPosition;
                 }
-            });
+            }
             return bestPosition;
         };
 
@@ -217,8 +238,9 @@
         var nextFitNextBlock = function (remainingBlocks, block, index, position, maxHeight) {
             var bestPosition = null;
             var minHeight = maxHeight;
-
-            position.addBlock(block, minHeight, function (newPosition) {
+            var positions = position.addBlock(block, minHeight);
+            for (var i = 0; i < positions.length; i++) {
+                var newPosition = positions[i];
                 var bestPositionCandidate = bestFitInternal(
                     remainingBlocks.
                         slice(0, index).
@@ -229,7 +251,7 @@
                     minHeight = bestPositionCandidate.height;
                     bestPosition = bestPositionCandidate;
                 }
-            });
+            }
             return bestPosition;
         };
 
