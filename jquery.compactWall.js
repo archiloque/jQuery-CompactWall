@@ -294,13 +294,14 @@
 
             var position = bestFit(blockList, $(container).innerWidth(), minBlockWidth);
             if (position) {
-                $.each(position.positionedBlocks, function (index, positionedBlock) {
-                    $(positionedBlock.block.block).
+                for (var j = 0; j < position.positionedBlocks.length; j++) {
+                    var block = position.positionedBlocks[j];
+                    $(block.block.block).
                         css('position', 'absolute').
-                        css('top', positionedBlock.top).
-                        css('left', positionedBlock.left);
+                        css('top', block.top).
+                        css('left', block.left);
 
-                });
+                }
                 $(container).
                     css('position', 'relative').
                     css('height', position.height);
