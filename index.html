@@ -1,0 +1,149 @@
+<html>
+<head>
+    <title>jQuery CompactWall</title>
+    <link href="external/prettify.css" rel="stylesheet" type="text/css"/>
+    <script src="external/jquery-1.7.2.min.js" type="text/javascript"></script>
+    <script src="external/prettify.js" type="text/javascript"></script>
+    <script src="jquery.compactWall.js" type="text/javascript"></script>
+    <style type="text/css">
+        body {
+            font-family: "Helvetica Neue", Helvetica, sans-serif;
+        }
+
+        pre.prettyprint {
+            border: 1px #AAAAAA solid;
+            border-radius: 5px;
+            padding: 5px;
+        }
+        pre.exampleItem {
+            border: 0;
+        }
+        .block {
+            border: 1px #AAAAAA solid;
+            border-radius: 5px;
+            margin: 4px;
+        }
+
+        .exampleItem {
+            display: inline-block;
+        }
+
+        .example, .compactExample {
+            margin: 5px;
+            border: 1px #AAAAAA solid;
+            display: inline-block;
+            vertical-align: top;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $.each($(".example"), function(index, example){
+                var example = $(example);
+                var id = example.attr('id');
+                var compact = '<div class="compactExample" id="' + id + '_" style="width:' + example.css('width') + '">' + example.html() + '</div>';
+                var html = "<pre class='prettyprint lang-html exampleItem'>" +
+                        example.parent().html().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") +
+                        "</pre>";
+                example.parent().append(html);
+                example.parent().append(compact);
+            });
+            $.each($('.compactExample'), function(index, example) {
+               $(example).compactWall($(example).children('.block'));
+            });
+            prettyPrint();
+        });
+    </script>
+</head>
+<body>
+<h1>jQuery CompactWall</h1>
+
+<p>CompactWall is jQuery plugin that will organize a set of blocks to use the minimum vertical space.</p>
+
+<p>It is a variation of the <a href="http://masonry.desandro.com/">masonry</a> plugin to be used the vertical space is
+    more important
+    than keeping the blocks ordered.</p>
+
+<h1>Usage</h1>
+
+<pre class="prettyprint lang-html">
+&lt;div id="container"&gt;
+    &lt;div class="block"&gt;...&lt;/div&gt;
+    &lt;div class="block"&gt;...&lt;/div&gt;
+    &lt;div class="block"&gt;...&lt;/div&gt;
+    ...
+&lt;/div&gt;
+</pre>
+
+<pre class="prettyprint lang-js">
+$(function(){
+    // #container is the container
+    // .block are the blocks to be optimized inside the container
+    $('#container').compactWall($('.block'));
+});
+</pre>
+
+Note that the block should have a know size to be reorganized, for example if you use images in your block you have
+to specify their size in the css.
+
+<h1>Examples</h1>
+
+<div>
+<div id="example1" style="width: 200px;" class="example">
+    <div class="block" style="width: 90px;height: 90px;">1</div>
+    <div class="block" style="width: 90px;height: 90px;">2</div>
+</div>
+</div>
+
+<div>
+<div id="example2" style="width: 200px;" class="example">
+    <div class="block" style="width: 90px;height: 90px;">1</div>
+    <div class="block" style="width: 90px;height: 90px;">2</div>
+    <div class="block" style="width: 90px;height: 190px;"3></div>
+</div>
+</div>
+
+<div>
+<div id="example3" style="width: 250px;" class="example">
+    <div class="block" style="width: 90px;height: 90px;">1</div>
+    <div class="block" style="width: 140px;height: 140px;">2</div>
+    <div class="block" style="width: 90px;height: 140px;">3</div>
+    <div class="block" style="width: 140px;height: 90px;">4</div>
+    <div class="block" style="width: 190px;height: 90px;">5</div>
+</div>
+</div>
+
+<div>
+<div id="example4" style="width: 300px;" class="example">
+    <div class="block" style="width: 90px;height: 140px;">1</div>
+    <div class="block" style="width: 90px;height: 90px;">2</div>
+    <div class="block" style="width: 90px;height: 90px;">3</div>
+    <div class="block" style="width: 40px;height: 40px;">4</div>
+    <div class="block" style="width: 40px;height: 40px;">5</div>
+</div>
+</div>
+
+<h1>License</h1>
+
+<p>Except files with their own copyright license:</p>
+
+<p>Copyright &copy; 2012 Julien Kirch<br>All rights reserved.</p>
+
+<pre>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the
+following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following
+disclaimer.
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following
+disclaimer in the documentation and/or other materials provided with the distribution.
+Neither the name of BiteScript nor the names of its contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
+
+</body>
+</html>
