@@ -61,7 +61,7 @@
                                         {
                                             top: slot.top,
                                             left: slot.left + block.width,
-                                            availableWidth: slot.availableWidth - block.width,
+                                            availableWidth: (slot.availableWidth - block.width),
                                             availableHeight: block.height
                                         }
                                     ]).concat(slots.slice(slotIndex + 1));
@@ -76,37 +76,26 @@
                                             top: slot.top + block.height,
                                             left: slot.left,
                                             availableWidth: slot.availableWidth,
-                                            availableHeight: slot.availableHeight - block.height
+                                            availableHeight: (slot.availableHeight - block.height)
                                         }
                                     ]).concat(slots.slice(slotIndex + 1));
                                 } else {
                                     // smaller width and smaller height: we move the slot to the bottom
                                     // and add another slot for the upper right corner of the block
                                     //@todo: possibly merge with slot above
-
-                                    var newSlotAvailableHeight = -1;
-                                    if (slot.availableHeight == Number.POSITIVE_INFINITY) {
-                                        if (slotIndex == 0) {
-                                            newSlotAvailableHeight = block.height;
-                                        } else {
-                                            newSlotAvailableHeight = (slots[slotIndex - 1].top - (slot.top + block.height));
-                                        }
-                                    } else {
-                                        newSlotAvailableHeight = block.height;
-                                    }
                                     newSlots = slots.slice(0, slotIndex)
                                         .concat([
                                         {
                                             top: slot.top + block.height,
                                             left: slot.left,
                                             availableWidth: slot.availableWidth,
-                                            availableHeight: slot.availableHeight - block.height
+                                            availableHeight: (slot.availableHeight - block.height)
                                         },
                                         {
                                             top: slot.top,
                                             left: slot.left + block.width,
-                                            availableWidth: slot.availableWidth - block.width,
-                                            availableHeight: newSlotAvailableHeight
+                                            availableWidth: (slot.availableWidth - block.width),
+                                            availableHeight: block.height
                                         }
                                     ]).concat(slots.slice(slotIndex + 1));
                                 }
