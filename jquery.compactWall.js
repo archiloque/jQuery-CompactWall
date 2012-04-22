@@ -1,5 +1,5 @@
 /**
- * jQuery CompactWall v2.1.04
+ * jQuery CompactWall v0.0.1
  * A jQuery plugin to organizes blocks in a compact way.
  * http://github.com/archiloque/compact-wall
  *
@@ -176,7 +176,9 @@
             return bestFitInternal(blocksList, position, Number.POSITIVE_INFINITY);
         };
 
-
+        /**
+         * Internal version of bestFit.
+         */
         var bestFitInternal = function (remainingBlocks, position, maxHeight) {
             if (remainingBlocks.length == 1) {
                 return bestFitLastBlock(remainingBlocks[0], position, maxHeight);
@@ -194,6 +196,9 @@
             }
         };
 
+        /**
+         * Find the best fitting position when adding the last block.
+         */
         var bestFitLastBlock = function (remainingBlock, position, maxHeight) {
             var bestPosition = null;
             var minHeight = maxHeight;
@@ -206,6 +211,9 @@
             return bestPosition;
         };
 
+        /**
+         * Find the best fitting position when adding a block to a position
+         */
         var nextFitNextBlock = function (remainingBlocks, block, index, position, maxHeight) {
             var bestPosition = null;
             var minHeight = maxHeight;
