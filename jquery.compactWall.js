@@ -21,7 +21,8 @@
             this.positionedBlocks = positionedBlocks;
             this.height = height;
             this.slots = slots;
-            // slots represents position that can be occupied by blocks
+
+            // slots represents position where blocks can be placed
             // they are sorted from left to right
 
             /**
@@ -31,92 +32,94 @@
              * @param callback the callback to be called with the new positions.
              */
             this.addBlock = function (block, maxHeight, callback) {
-                $.each(slots, function (slotIndex, slot) {
-                    if (((slot.top + block.height) < maxHeight) &&
-                        (slot.availableWidth >= block.width) &&
-                        (slot.availableHeight >= block.height)) {
+                if (height < maxHeight) {
+                    $.each(slots, function (slotIndex, slot) {
+                        if (((slot.top + block.height) < maxHeight) &&
+                            (slot.availableWidth >= block.width) &&
+                            (slot.availableHeight >= block.height)) {
 
-                        var positionedBlock = {
-                            top: slot.top,
-                            left: slot.left,
-                            block: block
-                        };
+                            var positionedBlock = {
+                                top: slot.top,
+                                left: slot.left,
+                                block: block
+                            };
 
-                        var newSlots = [];
+                            var newSlots = [];
 
-                        if (slot.availableHeight == block.height) {
-                            // the block has the same height than the slot
-                            if (slot.availableWidth == block.width) {
-                                // same height and same width: we kill the slot => 1
-                                newSlots = slots.slice(0, slotIndex)
-                                    .concat(slots.slice(slotIndex + 1));
+                            if (slot.availableHeight == block.height) {
+                                // the block has the same height than the slot
+                                if (slot.availableWidth == block.width) {
+                                    // same height and same width: we kill the slot
+                                    newSlots = slots.slice(0, slotIndex)
+                                        .concat(slots.slice(slotIndex + 1));
 
-                            } else {
-                                // same height but narrower : we move the slot to the right => 4
-                                //@todo: possibly merge with slot above
-                                newSlots = slots.slice(0, slotIndex)
-                                    .concat([
-                                    {
-                                        top: slot.top,
-                                        left: slot.left + block.width,
-                                        availableWidth: slot.availableWidth - block.width,
-                                        availableHeight: block.height
-                                    }
-                                ]).concat(slots.slice(slotIndex + 1));
-                            }
-                        } else {
-                            // the blocks is smaller
-                            if (block.width == slot.availableWidth) {
-                                // same width but smaller : we move the slot to the bottom => 2
-                                newSlots = slots.slice(0, slotIndex)
-                                    .concat([
-                                    {
-                                        top: slot.top + block.height,
-                                        left: slot.left,
-                                        availableWidth: slot.availableWidth,
-                                        availableHeight: slot.availableHeight - block.height
-                                    }
-                                ]).concat(slots.slice(slotIndex + 1));
-                            } else {
-                                // smaller width and smaller height: we move the slot to the bottom
-                                // and add another slot for the upper right corner of the block => 3
-                                //@todo: possibly merge with slot above
-
-                                var newSlotAvailableHeight = -1;
-                                if (slot.availableHeight == Number.POSITIVE_INFINITY) {
-                                    if (slotIndex == 0) {
-                                        newSlotAvailableHeight = block.height;
-                                    } else {
-                                        newSlotAvailableHeight = (slots[slotIndex - 1].top - (slot.top + block.height));
-                                    }
                                 } else {
-                                    newSlotAvailableHeight = block.height;
+                                    // same height but narrower : we move the slot to the right
+                                    //@todo: possibly merge with slot above
+                                    newSlots = slots.slice(0, slotIndex)
+                                        .concat([
+                                        {
+                                            top: slot.top,
+                                            left: slot.left + block.width,
+                                            availableWidth: slot.availableWidth - block.width,
+                                            availableHeight: block.height
+                                        }
+                                    ]).concat(slots.slice(slotIndex + 1));
                                 }
-                                newSlots = slots.slice(0, slotIndex)
-                                    .concat([
-                                    {
-                                        top: slot.top + block.height,
-                                        left: slot.left,
-                                        availableWidth: slot.availableWidth,
-                                        availableHeight: slot.availableHeight - block.height
-                                    },
-                                    {
-                                        top: slot.top,
-                                        left: slot.left + block.width,
-                                        availableWidth: slot.availableWidth - block.width,
-                                        availableHeight: newSlotAvailableHeight
-                                    }
-                                ]).concat(slots.slice(slotIndex + 1));
-                            }
-                        }
+                            } else {
+                                // the blocks is smaller
+                                if (block.width == slot.availableWidth) {
+                                    // same width but smaller : we move the slot to the bottom
+                                    newSlots = slots.slice(0, slotIndex)
+                                        .concat([
+                                        {
+                                            top: slot.top + block.height,
+                                            left: slot.left,
+                                            availableWidth: slot.availableWidth,
+                                            availableHeight: slot.availableHeight - block.height
+                                        }
+                                    ]).concat(slots.slice(slotIndex + 1));
+                                } else {
+                                    // smaller width and smaller height: we move the slot to the bottom
+                                    // and add another slot for the upper right corner of the block
+                                    //@todo: possibly merge with slot above
 
-                        callback(new BlocksPosition(
-                            positionedBlocks.concat([positionedBlock]),
-                            newSlots,
-                            Math.max(height, slot.top + block.height),
-                            containerWith));
-                    }
-                });
+                                    var newSlotAvailableHeight = -1;
+                                    if (slot.availableHeight == Number.POSITIVE_INFINITY) {
+                                        if (slotIndex == 0) {
+                                            newSlotAvailableHeight = block.height;
+                                        } else {
+                                            newSlotAvailableHeight = (slots[slotIndex - 1].top - (slot.top + block.height));
+                                        }
+                                    } else {
+                                        newSlotAvailableHeight = block.height;
+                                    }
+                                    newSlots = slots.slice(0, slotIndex)
+                                        .concat([
+                                        {
+                                            top: slot.top + block.height,
+                                            left: slot.left,
+                                            availableWidth: slot.availableWidth,
+                                            availableHeight: slot.availableHeight - block.height
+                                        },
+                                        {
+                                            top: slot.top,
+                                            left: slot.left + block.width,
+                                            availableWidth: slot.availableWidth - block.width,
+                                            availableHeight: newSlotAvailableHeight
+                                        }
+                                    ]).concat(slots.slice(slotIndex + 1));
+                                }
+                            }
+
+                            callback(new BlocksPosition(
+                                positionedBlocks.concat([positionedBlock]),
+                                newSlots,
+                                Math.max(height, slot.top + block.height),
+                                containerWith));
+                        }
+                    });
+                }
             }
         };
 
@@ -153,7 +156,7 @@
             var bestPosition = null;
             var minHeight = maxHeight;
             position.addBlock(remainingBlock, minHeight, function (newPosition) {
-                if(newPosition.height < minHeight) {
+                if (newPosition.height < minHeight) {
                     minHeight = newPosition.height;
                     bestPosition = newPosition;
                 }
@@ -170,8 +173,8 @@
                     remainingBlocks.
                         slice(0, index).
                         concat(remainingBlocks.slice(index + 1)),
-                        newPosition,
-                        minHeight);
+                    newPosition,
+                    minHeight);
                 if (bestPositionCandidate && (bestPositionCandidate.height < minHeight)) {
                     minHeight = bestPositionCandidate.height;
                     bestPosition = bestPositionCandidate;
