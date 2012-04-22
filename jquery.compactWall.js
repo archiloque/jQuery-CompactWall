@@ -55,16 +55,32 @@
 
                                 } else {
                                     // same height but narrower : we move the slot to the right
-                                    //@todo: possibly merge with slot above
-                                    newSlots = slots.slice(0, slotIndex)
-                                        .concat([
-                                        {
-                                            top: slot.top,
-                                            left: slot.left + block.width,
-                                            availableWidth: (slot.availableWidth - block.width),
-                                            availableHeight: block.height
-                                        }
-                                    ]).concat(slots.slice(slotIndex + 1));
+                                    if ((slots.length > (slotIndex + 1)) &&
+                                        (slots[slotIndex + 1].left == (slot.left + block.width)) &&
+                                        (slots[slotIndex + 1].availableWidth == (slot.availableWidth - block.width))) {
+                                        // wannabe new position is aligned with the next slot
+                                        // this design could have been reached by another organisation
+                                        // but visually it is interesting
+                                        newSlots = slots.slice(0, slotIndex)
+                                            .concat([
+                                            {
+                                                top: slots[slotIndex + 1].top,
+                                                left: slots[slotIndex + 1].left,
+                                                availableWidth: slots[slotIndex + 1].availableWidth,
+                                                availableHeight: (slots[slotIndex + 1].availableHeight + block.height)
+                                            }
+                                        ]).concat(slots.slice(slotIndex + 2));
+                                    } else {
+                                        newSlots = slots.slice(0, slotIndex)
+                                            .concat([
+                                            {
+                                                top: slot.top,
+                                                left: slot.left + block.width,
+                                                availableWidth: (slot.availableWidth - block.width),
+                                                availableHeight: block.height
+                                            }
+                                        ]).concat(slots.slice(slotIndex + 1));
+                                    }
                                 }
                             } else {
                                 // the blocks is smaller
@@ -82,22 +98,59 @@
                                 } else {
                                     // smaller width and smaller height: we move the slot to the bottom
                                     // and add another slot for the upper right corner of the block
-                                    //@todo: possibly merge with slot above
-                                    newSlots = slots.slice(0, slotIndex)
-                                        .concat([
-                                        {
-                                            top: slot.top + block.height,
-                                            left: slot.left,
-                                            availableWidth: slot.availableWidth,
-                                            availableHeight: (slot.availableHeight - block.height)
-                                        },
-                                        {
-                                            top: slot.top,
-                                            left: slot.left + block.width,
-                                            availableWidth: (slot.availableWidth - block.width),
-                                            availableHeight: block.height
+                                    if ((slots.length > (slotIndex + 1)) &&
+                                        (slots[slotIndex + 1].left == (slot.left + block.width)) &&
+                                        (slots[slotIndex + 1].availableWidth == (slot.availableWidth - block.width))) {
+                                        // wannabe new slot is aligned with the next slot
+                                        // this design could have been reached by another organisation
+                                        // but visually it is interesting
+                                        if (slotIndex == 0) {
+                                            // the current slot is the first one
+                                            // move it to the bottom and increase height of next one
+                                            newSlots = [
+                                                {
+                                                    top: slot.top + block.height,
+                                                    left: 0,
+                                                    availableWidth: slot.availableWidth,
+                                                    availableHeight: Number.Infinity
+                                                },
+                                                {
+                                                    top: slots[slotIndex + 1].top,
+                                                    left: slots[slotIndex + 1].left,
+                                                    availableWidth: slots[slotIndex + 1].availableWidth,
+                                                    availableHeight: (slots[slotIndex + 1].availableHeight + block.height)
+                                                }
+                                            ].concat(slots.slice(slotIndex + 2));
+                                        } else {
+                                            // current slot is not the first one
+                                            // increase the size of next one
+                                            newSlots = slots.slice(0, slotIndex)
+                                                .concat([
+                                                {
+                                                    top: slots[slotIndex + 1].top,
+                                                    left: slots[slotIndex + 1].left,
+                                                    availableWidth: slots[slotIndex + 1].availableWidth,
+                                                    availableHeight: (slots[slotIndex + 1].availableHeight + block.height)
+                                                }
+                                            ]).concat(slots.slice(slotIndex + 2));
                                         }
-                                    ]).concat(slots.slice(slotIndex + 1));
+                                    } else {
+                                        newSlots = slots.slice(0, slotIndex)
+                                            .concat([
+                                            {
+                                                top: slot.top + block.height,
+                                                left: slot.left,
+                                                availableWidth: slot.availableWidth,
+                                                availableHeight: (slot.availableHeight - block.height)
+                                            },
+                                            {
+                                                top: slot.top,
+                                                left: slot.left + block.width,
+                                                availableWidth: (slot.availableWidth - block.width),
+                                                availableHeight: block.height
+                                            }
+                                        ]).concat(slots.slice(slotIndex + 1));
+                                    }
                                 }
                             }
 
