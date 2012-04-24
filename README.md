@@ -5,6 +5,8 @@ CompactWall is jQuery plugin that will organize a set of blocks to use the minim
 It is a variation of the [masonry](http://masonry.desandro.com/) plugin to be used the vertical space is more important
 than keeping the blocks ordered.
 
+A more detailed documentation and some example can be found [here](http://archiloque.net/compactwall.html).
+
 # Usage
 
     <div id="container">
