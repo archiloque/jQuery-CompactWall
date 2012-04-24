@@ -23,7 +23,6 @@ than keeping the blocks ordered.
 Note that the blocks should have a know size to be reorganized, for example if you use images in your block you have
 to specify their size in the css.
 
-
 # License
 
 Except files with their own copyright license:

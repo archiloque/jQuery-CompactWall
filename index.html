@@ -95,11 +95,22 @@
 <body>
 <h1>jQuery CompactWall</h1>
 
-<p>CompactWall is jQuery plugin that will organize a set of blocks to use the minimum vertical space.</p>
+<p>CompactWall is jQuery plugin that will organize a set of blocks to use the minimum vertical space, for example a set of pictures on an image wall.</p>
 
-<p>It is a variation of the <a href="http://masonry.desandro.com/">masonry</a> plugin to be used the vertical space is
-    more important
-    than keeping the blocks ordered.</p>
+<p>It is somehow a variation of the <a href="http://masonry.desandro.com/">masonry</a> plugin to be used the vertical space is
+more important than keeping the blocks ordered.</p>
+
+<p>The algorithm is pretty plain but already works nicely, don't hesitate to <a href="http://archiloque.net">contact me</a> if you have comments or suggestion.</p>
+
+<h1>Resizing</h1>
+
+If you want the items to be repacked when the screen is resized,
+you may use the <a href="http://benalman.com/projects/jquery-resize-plugin/">jQuery resize event</a> and call compactWall in the resize.
+
+
+<h1>Source</h1>
+
+The source code can be found on <a href="http://github.com/archiloque/jquery-compactwall">GitHub</a>.
 
 <h1>Usage</h1>
 
@@ -120,8 +131,8 @@ $(function(){
 });
 </pre>
 
-Note that the block should have a know size to be reorganized, for example if you use images in your block you have
-to specify their size in the css.
+Note that the blocks should have a know size to be reorganized, for example if you use images in your block you have
+to specify their size in the css or to use one the image onload plugins to call the plugin once all the image are ready.
 
 <h1>Examples</h1>
 
