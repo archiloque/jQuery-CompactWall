@@ -98,7 +98,6 @@
                             (slots[slotIndex + 1][2] + block[0]),
                             slots[slotIndex + 1][2]
                         ]);
-                    return r;
                 } else {
                     var availableWidth = slot[3] - block[1];
                     if (availableWidth >= minBlockWidth) {
@@ -108,12 +107,11 @@
                             block[0],
                             availableWidth
                         ]);
-                        return r;
                     } else {
                         r.splice(slotIndex, 1);
-                        return r;
                     }
                 }
+                return r;
             }
 
             function smallerNarrower(slots, slotIndex, slot, block) {
@@ -141,7 +139,6 @@
                                 slots[slotIndex + 1][3]
                             ]
                         );
-                        return r;
                     } else {
                         // current slot is not the first one
                         // increase the size of next one
@@ -153,7 +150,6 @@
                                 slots[slotIndex + 1][3]
                             ]
                         );
-                        return r;
                     }
                 } else {
                     var availableWidth = (slot[3] - block[1]);
@@ -170,7 +166,6 @@
                                 block[0],
                                 availableWidth
                             ]);
-                        return r;
                     } else {
                         r.splice(slotIndex, 1,
                             [
@@ -179,9 +174,9 @@
                                 (slot[2] - block[0]),
                                 slot[3]
                             ]);
-                        return r;
                     }
                 }
+                return r;
             }
 
             function smallerSameWidth(slots, slotIndex, slot, block) {
