@@ -74,9 +74,6 @@
             var maxHeight = Number.POSITIVE_INFINITY;
 
 
-
-
-
             function sameHeightSameWidth(slots, slotIndex) {
                 var r = slots.slice(0);
                 r.splice(slotIndex, 1);
@@ -86,17 +83,15 @@
             function sameHeightNarrower(slots, slotIndex, slot, block) {
                 var r = slots.slice(0);
                 if ((slots.length > (slotIndex + 1)) &&
-                    (slots[slotIndex + 1][1] == (slot[1] + block[0])) &&
+                    (slots[slotIndex + 1][1] == (slot[1] + block[1])) &&
                     (slots[slotIndex + 1][3] == (slot[3] - block[1]))) {
                     // wannabe new position is aligned with the next slot
-                    // this design could have been reached by another organisation
-                    // but visually it is interesting
-                    r.splice(slotIndex, 1,
+                    r.splice(slotIndex, 2,
                         [
                             slots[slotIndex + 1][0],
                             slots[slotIndex + 1][1],
                             (slots[slotIndex + 1][2] + block[0]),
-                            slots[slotIndex + 1][2]
+                            slots[slotIndex + 1][3]
                         ]);
                 } else {
                     var availableWidth = slot[3] - block[1];
@@ -120,8 +115,6 @@
                     (slots[slotIndex + 1][1] == (slot[1] + block[1])) &&
                     (slots[slotIndex + 1][3] == (slot[3] - block[1]))) {
                     // wannabe new slot is aligned with the next slot
-                    // this design could have been reached by another organisation
-                    // but visually it is interesting
                     if (slotIndex == 0) {
                         // the current slot is the first one
                         // move it to the bottom and increase height of next one
@@ -141,15 +134,33 @@
                         );
                     } else {
                         // current slot is not the first one
-                        // increase the size of next one
-                        r.splice(slotIndex, 1,
-                            [
-                                slots[slotIndex + 1][0],
-                                slots[slotIndex + 1][1],
-                                (slots[slotIndex + 1][2] + block[0]),
-                                slots[slotIndex + 1][3]
-                            ]
-                        );
+                        // we will increase the height of next slot
+                        if ((slot[0] + block[0]) == slots[slotIndex - 1][0]) {
+                            // bottom of block will be at same height that
+                            // the previous block's slot => the current slot disappear
+                            r.splice(slotIndex, 2,
+                                [
+                                    slots[slotIndex + 1][0],
+                                    slots[slotIndex + 1][1],
+                                    (slots[slotIndex + 1][2] + block[0]),
+                                    slots[slotIndex + 1][3]
+                                ]
+                            );
+                        } else {
+                            r.splice(slotIndex, 2,
+                                [ slot[0] + block[0],
+                                    slot[1],
+                                    (slot[2] - block[0]),
+                                    slot[3]
+                                ],
+                                [
+                                    slots[slotIndex + 1][0],
+                                    slots[slotIndex + 1][1],
+                                    (slots[slotIndex + 1][2] + block[0]),
+                                    slots[slotIndex + 1][3]
+                                ]
+                            );
+                        }
                     }
                 } else {
                     var availableWidth = (slot[3] - block[1]);
@@ -226,7 +237,11 @@
                                 maxHeight = height;
                                 var newBlocks = positionedBlocks.slice(0);
                                 newBlocks.splice(-1, 0, positionedBlock);
-                                bestResult = [[], newBlocks, height];
+                                bestResult = [
+                                    [],
+                                    newBlocks,
+                                    height
+                                ];
                             }
                         } else {
 
@@ -278,7 +293,9 @@
             function bestFit(blocksList) {
                 return addNextBlock(
                     [
-                        [[0, 0, Number.POSITIVE_INFINITY, containerWidth]],
+                        [
+                            [0, 0, Number.POSITIVE_INFINITY, containerWidth]
+                        ],
                         [],
                         0
                     ],
