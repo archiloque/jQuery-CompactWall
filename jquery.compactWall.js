@@ -75,17 +75,22 @@
 
 
             function sameHeightSameWidth(slots, slotIndex) {
+                // block is the same than the slot, just drop the slot
                 var r = slots.slice(0);
                 r.splice(slotIndex, 1);
                 return r;
             }
 
             function sameHeightNarrower(slots, slotIndex, slot, block) {
+                // block is the same height but narrower
+
                 var r = slots.slice(0);
                 if ((slots.length > (slotIndex + 1)) &&
                     (slots[slotIndex + 1][1] == (slot[1] + block[1])) &&
                     (slots[slotIndex + 1][3] == (slot[3] - block[1]))) {
-                    // wannabe new position is aligned with the next slot
+                    // wannabe new slot is aligned with the next slot
+                    // so instead of adding a new slot
+                    // we increase the height of the next one
                     r.splice(slotIndex, 2,
                         [
                             slots[slotIndex + 1][0],
@@ -94,6 +99,7 @@
                             slots[slotIndex + 1][3]
                         ]);
                 } else {
+                    // we will add a new slot if it is wide enough
                     var availableWidth = slot[3] - block[1];
                     if (availableWidth >= minBlockWidth) {
                         r.splice(slotIndex, 1, [
@@ -110,6 +116,8 @@
             }
 
             function smallerNarrower(slots, slotIndex, slot, block) {
+                // block is smaller and narrower than the slot
+
                 var r = slots.slice(0);
                 if ((slots.length > (slotIndex + 1)) &&
                     (slots[slotIndex + 1][1] == (slot[1] + block[1])) &&
@@ -163,6 +171,7 @@
                         }
                     }
                 } else {
+                    // we will add a new slot if it is wide enough
                     var availableWidth = (slot[3] - block[1]);
                     if (availableWidth >= minBlockWidth) {
                         r.splice(slotIndex, 1,
@@ -190,6 +199,7 @@
                 return r;
             }
 
+            // smaller but same width
             function smallerSameWidth(slots, slotIndex, slot, block) {
                 var r = slots.slice(0);
                 r.splice(slotIndex, 1,
@@ -245,25 +255,25 @@
                             }
                         } else {
 
+                            // not the last block => calculate the new slots
+                            // then recurse
                             var newSlots = [];
-
                             if (slot[2] == block[0]) {
                                 // the block has the same height than the slot
                                 if (slot[3] == block[1]) {
-                                    // same height and same width: we kill the slot
+                                    // same height and same width
                                     newSlots = sameHeightSameWidth(position[0], slotIndex);
                                 } else {
-                                    // same height but narrower : we move the slot to the right
+                                    // same height but narrower
                                     newSlots = sameHeightNarrower(position[0], slotIndex, slot, block);
                                 }
                             } else {
                                 // the blocks is smaller
                                 if (block[1] == slot[3]) {
-                                    // same width but smaller : we move the slot to the bottom
+                                    // same width but smaller
                                     newSlots = smallerSameWidth(position[0], slotIndex, slot, block);
                                 } else {
-                                    // smaller width and smaller height: we move the slot to the bottom
-                                    // and add another slot for the upper right corner of the block
+                                    // smaller width and smaller height
                                     newSlots = smallerNarrower(position[0], slotIndex, slot, block);
                                 }
                             }
