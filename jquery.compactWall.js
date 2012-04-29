@@ -1,5 +1,5 @@
 /**
- * jQuery CompactWall v0.0.1
+ * jQuery CompactWall v0.1.0
  * A jQuery plugin to organizes blocks in a compact way.
  * http://github.com/archiloque/compact-wall
  *
@@ -9,6 +9,18 @@
 
 (function ($) {
     $.fn.compactWall = function (blocks, options) {
+
+        // the algorithm works by placing the blocks
+        // from the biggest to the smallest in the possible positions
+        // therefore it doesn't provide the best position
+        // but a good enough one without requiring too much calculations
+
+        // the code is kept simple, the only trick is
+        // some optimizations when several blocks have the same size
+        // to avoid recalculating the same positions several times
+        // for this we keep a list of all the already used positions for a group
+        // when dealing with groups, the position of a block is
+        // the height * containerWidth + width
 
         // a slot represents a position where a block can be placed, it contains
         // - the top position in pixel of the top left corner
@@ -21,6 +33,7 @@
         // - the height
         // - the width
         // - the jQuery block object
+        // - its position in a group of blocks of the same size (or -1 if not part of a group)
 
         // a positioned block represented a block placed somewhere, it contains
         // - the block
@@ -31,14 +44,6 @@
         // - the list of positioned blocks
         // - the total height
 
-        /**
-         * Represents a position of block.
-         * @param containerWith the with of the container.
-         * @param positionedBlocks the already positioned blocks.
-         * @param slots the list of slots.
-         * @param height the current position's height.
-         */
-
         return this.each(function (i, container) {
             // the block lists
             // all have an height, a width, and a block
@@ -47,7 +52,7 @@
             }
 
             var settings = $.extend({
-                'containerWidth': $(container).innerWidth()
+                'containerWidth':$(container).innerWidth()
             }, options);
 
             var blockList = [];
@@ -56,7 +61,8 @@
                 blockList.push([
                     blockJ.outerHeight(true),
                     blockJ.outerWidth(true),
-                    blockJ
+                    blockJ,
+                    -1
                 ]);
             }
 
@@ -68,6 +74,19 @@
                     return b2[1] - b1[1];
                 }
             });
+
+            // find identical blocks
+            for (k = 1; k < blockList.length; k++) {
+                if ((blockList[k][0] == blockList[k - 1][0]) && (blockList[k][1] == blockList[k - 1][1])) {
+                    if (blockList[k - 1][3] == -1) {
+                        blockList[k - 1][3] = 0;
+                        blockList[k][3] = 1;
+
+                    } else {
+                        blockList[k][3] = blockList[k - 1][3] + 1;
+                    }
+                }
+            }
 
             var minBlockWidth = blockList[blockList.length - 1][1];
             var containerWidth = settings.containerWidth;
@@ -213,13 +232,122 @@
             }
 
             /**
-             * Add the next block to a position.
+             * Add the next block in a specific slot.
              * @params position the original position
-             * @param blocks the remaining blocks.
+             * @param positionedBlock the positioned block
+             * @param slotIndex the slot index
+             * @param height the height of the new position
+             * @param remainingBlocks the blocks that have to be placed
+             * @param currentGroupPosition the position of the occupied slots in the current group of blocks with same size
+             * @param currentGroupPositions the positions already reached in the current group of blocks with same size
+             *         it's an array of array
+             * @return the position requiring the lowest vertical space
              */
-            function addNextBlock(position, blocks) {
+            function addNextBlockInSlot(position, positionedBlock, slotIndex, height, remainingBlocks, currentGroupPosition, currentGroupPositions) {
+                var block = positionedBlock[0];
+                var slot = positionedBlock[1];
+                // if the block is part of a group
+                if (block[3] != -1) {
+
+                    // we will check if we already reached this position
+                    // in the current group
+
+                    // calculate the representation of the positions
+                    if (block[3] == 0) {
+                        currentGroupPositions = [];
+                        nextGroupPosition = [slot[0] * containerWidth + slot[1]];
+                    } else if (block[3] >= 1) {
+                        var nextGroupPosition = currentGroupPosition.slice(0);
+                        var currentSlotPosition = slot[0] * containerWidth + slot[1];
+
+                        // insert the position at the right place
+                        var found = false;
+                        for (var k = 0; (!found) && k < currentGroupPosition.length; k++) {
+                            if (currentGroupPosition[k] > currentSlotPosition) {
+                                found = true;
+                                nextGroupPosition.splice(k, 0, currentSlotPosition);
+                            }
+                        }
+                        if (!found) {
+                            nextGroupPosition.push(currentSlotPosition);
+                        }
+
+                        // look at the position with the same number of slots
+                        var alreadyReachedPositions = currentGroupPositions[nextGroupPosition.length];
+                        if (alreadyReachedPositions != null) {
+                            for (var i = 0; i < alreadyReachedPositions.length; i++) {
+                                var p = alreadyReachedPositions[i];
+                                var identical = true;
+                                for (var j = 0; identical && (j < nextGroupPosition.length); j++) {
+                                    identical = nextGroupPosition[j] == p[j];
+                                }
+                                // already got an identical position: bye bye
+                                if (identical) {
+                                    return null;
+                                }
+                            }
+
+                            alreadyReachedPositions.push(nextGroupPosition);
+                        } else {
+                            // no position with the same number of slots
+                            // => create it with the current position
+                            currentGroupPositions[nextGroupPosition.length] = [nextGroupPosition];
+                        }
+
+                    }
+                }
+
+                // calculate the new slots then recurse
+                var newSlots = [];
+                if (slot[2] == block[0]) {
+                    // the block has the same height than the slot
+                    if (slot[3] == block[1]) {
+                        // same height and same width
+                        newSlots = sameHeightSameWidth(position[0], slotIndex);
+                    } else {
+                        // same height but narrower
+                        newSlots = sameHeightNarrower(position[0], slotIndex, slot, block);
+                    }
+                } else {
+                    // the blocks is smaller
+                    if (block[1] == slot[3]) {
+                        // same width but smaller
+                        newSlots = smallerSameWidth(position[0], slotIndex, slot, block);
+                    } else {
+                        // smaller width and smaller height
+                        newSlots = smallerNarrower(position[0], slotIndex, slot, block);
+                    }
+                }
+
+                var newBlocks = position[1].slice(0);
+                newBlocks.splice(-1, 0, positionedBlock);
+
+                return addNextBlock(
+                    [
+                        newSlots,
+                        newBlocks,
+                        height
+                    ],
+                    remainingBlocks,
+                    currentGroupPositions,
+                    nextGroupPosition
+                );
+            }
+
+            /**
+             * Add the next block to a position in all possible manners,
+             * then call itself with the remaining blocks.
+             * @params position the original position
+             * @param blocks the remaining blocks
+             * @param currentGroupPosition the position of the occupied slots in the current group of blocks with same size
+             * @param currentGroupPositions the positions already reached in the current group of blocks with same size
+             *         it's an array of array
+             * @return the position requiring the lowest vertical space
+             */
+            function addNextBlock(position, blocks, currentGroupPositions, currentGroupPosition) {
                 var bestResult = null;
                 var block = blocks[0];
+
                 var remainingBlocks = blocks.slice(1);
                 var positionedBlocks = position[1];
 
@@ -228,6 +356,8 @@
                 // so we have a chance to put it higher
                 for (var slotIndex = (position[0].length - 1); slotIndex >= 0; slotIndex--) {
                     var slot = position[0][slotIndex];
+                    // check if the slot is large enough
+                    // and if it's not too high
                     if (((slot[0] + block[0]) < maxHeight) &&
                         (slot[2] >= block[0]) &&
                         (slot[3] >= block[1])) {
@@ -241,8 +371,9 @@
                         var blockHeight = slot[0] + block[0];
                         var height = (position[2] > blockHeight) ? position[2] : blockHeight;
 
-                        if (remainingBlocks.length == 0) {
-                            // it was the last block
+                        if (blocks.length == 1) {
+                            // it's the last block
+                            // => no need to update the slots or anything
                             if (height <= maxHeight) {
                                 maxHeight = height;
                                 var newBlocks = positionedBlocks.slice(0);
@@ -254,43 +385,16 @@
                                 ];
                             }
                         } else {
+                            var candidate = addNextBlockInSlot(
+                                position,
+                                positionedBlock,
+                                slotIndex,
+                                height,
+                                remainingBlocks,
+                                currentGroupPosition,
+                                currentGroupPositions
+                            );
 
-                            // not the last block => calculate the new slots
-                            // then recurse
-                            var newSlots = [];
-                            if (slot[2] == block[0]) {
-                                // the block has the same height than the slot
-                                if (slot[3] == block[1]) {
-                                    // same height and same width
-                                    newSlots = sameHeightSameWidth(position[0], slotIndex);
-                                } else {
-                                    // same height but narrower
-                                    newSlots = sameHeightNarrower(position[0], slotIndex, slot, block);
-                                }
-                            } else {
-                                // the blocks is smaller
-                                if (block[1] == slot[3]) {
-                                    // same width but smaller
-                                    newSlots = smallerSameWidth(position[0], slotIndex, slot, block);
-                                } else {
-                                    // smaller width and smaller height
-                                    newSlots = smallerNarrower(position[0], slotIndex, slot, block);
-                                }
-                            }
-
-                            // not the last block
-                            var newBlocks = positionedBlocks.slice(0);
-                            newBlocks.splice(-1, 0, positionedBlock);
-
-                            var candidate =
-                                addNextBlock(
-                                    [
-                                        newSlots,
-                                        newBlocks,
-                                        height
-                                    ],
-                                    remainingBlocks
-                                );
                             if (candidate && (candidate[2] <= maxHeight)) {
                                 bestResult = candidate;
                             }
@@ -309,7 +413,9 @@
                         [],
                         0
                     ],
-                    blocksList);
+                    blocksList,
+                    [],
+                    []);
             }
 
             var position = bestFit(blockList);
