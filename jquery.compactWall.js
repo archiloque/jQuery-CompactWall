@@ -239,8 +239,9 @@
              * @param height the height of the new position
              * @param remainingBlocks the blocks that have to be placed
              * @param currentGroupPosition the position of the occupied slots in the current group of blocks with same size
+             *          as a list of positions
              * @param currentGroupPositions the positions already reached in the current group of blocks with same size
-             *         it's an array of array
+             *         it's an array of trees
              * @return the position requiring the lowest vertical space
              */
             function addNextBlockInSlot(position, positionedBlock, slotIndex, height, remainingBlocks, currentGroupPosition, currentGroupPositions) {
@@ -252,46 +253,58 @@
                     // we will check if we already reached this position
                     // in the current group
 
-                    // calculate the representation of the positions
+                    // calculate the representation of the position
                     if (block[3] == 0) {
+                        // it's the first block of a group of blocks of the same size
                         currentGroupPositions = [];
                         nextGroupPosition = [slot[0] * containerWidth + slot[1]];
                     } else if (block[3] >= 1) {
+                        // in a group of positions but not the first one
                         var nextGroupPosition = currentGroupPosition.slice(0);
                         var currentSlotPosition = slot[0] * containerWidth + slot[1];
 
-                        // insert the position at the right place
-                        var found = false;
-                        for (var k = 0; (!found) && k < currentGroupPosition.length; k++) {
+                        // insert the position at the right place in the list
+                        // to keep it sorted
+                        var positionFound = false;
+                        for (var k = 0; (!positionFound) && k < currentGroupPosition.length; k++) {
                             if (currentGroupPosition[k] > currentSlotPosition) {
-                                found = true;
+                                positionFound = true;
                                 nextGroupPosition.splice(k, 0, currentSlotPosition);
                             }
                         }
-                        if (!found) {
+                        if (!positionFound) {
                             nextGroupPosition.push(currentSlotPosition);
                         }
 
-                        // look at the position with the same number of slots
-                        var alreadyReachedPositions = currentGroupPositions[nextGroupPosition.length];
-                        if (alreadyReachedPositions != null) {
-                            for (var i = 0; i < alreadyReachedPositions.length; i++) {
-                                var p = alreadyReachedPositions[i];
-                                var identical = true;
-                                for (var j = 0; identical && (j < nextGroupPosition.length); j++) {
-                                    identical = nextGroupPosition[j] == p[j];
-                                }
-                                // already got an identical position: bye bye
-                                if (identical) {
-                                    return null;
+                        // look at the positions with the same number of slots
+                        // and check if it's already here
+                        // the previous positions are represented by a tree
+                        // of hashes where the keys are the positions' ids
+                        var c = currentGroupPositions[nextGroupPosition.length];
+                        if (c != null) {
+                            var identicalFound = true;
+                            for (var i = 0; identicalFound && (i < nextGroupPosition.length); i++) {
+                                var n = c[nextGroupPosition[i]];
+                                if (!n) {
+                                    identicalFound = false;
+                                    for (var j = i; j < nextGroupPosition.length; j++) {
+                                        c = c[nextGroupPosition[j]] = {}
+                                    }
+                                } else {
+                                    c = n;
                                 }
                             }
+                            if (identicalFound) {
+                                return null;
+                            }
 
-                            alreadyReachedPositions.push(nextGroupPosition);
                         } else {
                             // no position with the same number of slots
                             // => create it with the current position
-                            currentGroupPositions[nextGroupPosition.length] = [nextGroupPosition];
+                            c = currentGroupPositions[nextGroupPosition.length] = {};
+                            for (i = 0; i < nextGroupPosition.length; i++) {
+                                c = c[nextGroupPosition[i]] = {}
+                            }
                         }
 
                     }
