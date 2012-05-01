@@ -1,6 +1,6 @@
 # jQuery CompactWall
 
-CompactWall is jQuery plugin that will organize a set of blocks to use the minimum vertical space.
+CompactWall is jQuery plugin that will pack a set of blocks to use the minimum vertical space.
 
 It is a variation of the [masonry](http://masonry.desandro.com/) plugin to be used the vertical space is more important
 than keeping the blocks ordered.
