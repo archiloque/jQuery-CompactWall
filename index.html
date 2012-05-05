@@ -102,7 +102,7 @@
 <body>
 <h1>jQuery CompactWall</h1>
 
-<p>CompactWall is a jQuery plugin that will organize a set of blocks to use the minimum vertical space, for example a set of pictures on an image wall.</p>
+<p>CompactWall is a packing jQuery plugin that will organize a set of blocks to use the minimum vertical space, for example a set of pictures on an image wall.</p>
 
 <p>It is somehow a variation of the <a href="http://masonry.desandro.com/">masonry</a> plugin to be used the vertical space is
 more important than keeping the blocks ordered.</p>
@@ -112,8 +112,7 @@ more important than keeping the blocks ordered.</p>
 <h1>Resizing</h1>
 
 If you want the items to be repacked when the screen is resized,
-you may use the <a href="http://benalman.com/projects/jquery-resize-plugin/">jQuery resize event</a> and call compactWall in the resize.
-
+you can use the <a href="http://benalman.com/projects/jquery-resize-plugin/">jQuery resize event</a> and call compactWall in the resize.
 
 <h1>Source</h1>
 
@@ -138,8 +137,17 @@ $(function(){
 });
 </pre>
 
-Note that the blocks should have a know size to be reorganized, for example if you use images in your block you have
-to specify their size in the css or to use one the image onload plugins to call the plugin once all the image are ready.
+<p>Parameters: can be passed in a hash as the second argument:
+
+<ul>
+<li>containerWidth: the width of the container to pack the blocks in, default is the inner width of the object the plugin is called on</li>
+<li>maxTime: the number of milliseconds before the calculation stops, will avoid using too much time when the number of combinations is too high, default is 100</li>
+</ul>
+</p>
+
+
+<p>Note that the blocks should have a know size to be reorganized, for example if you use images in your block you have
+to specify their size in the css or to use one the image onload plugins to call the plugin once all the image are ready.</p>
 
 <h1>Examples</h1>
 
@@ -197,12 +205,12 @@ to specify their size in the css or to use one the image onload plugins to call 
 
 <table><tr><td>
     <div id="example7" style="width: 400px;" class="example">
-        <div class="block" style="width: 290px;height: 290px;">1</div>
+        <div class="block" style="width: 90px;height: 190px;">1</div>
         <div class="block" style="width: 190px;height: 290px;">2</div>
         <div class="block" style="width: 90px;height: 90px;">3</div>
         <div class="block" style="width: 90px;height: 90px;">4</div>
         <div class="block" style="width: 90px;height: 190px;">5</div>
-        <div class="block" style="width: 90px;height: 190px;">6</div>
+        <div class="block" style="width: 290px;height: 290px;">6</div>
     </div>
 </td></tr></table>
 

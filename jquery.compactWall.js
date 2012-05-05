@@ -52,7 +52,8 @@
             }
 
             var settings = $.extend({
-                'containerWidth':$(container).innerWidth()
+                'containerWidth':$(container).innerWidth(),
+                'maxTime': 100
             }, options);
 
             var blockList = [];
@@ -66,7 +67,7 @@
                 ]);
             }
 
-            // sort the blocks by width
+            // sort the blocks by width then height
             blockList = blockList.sort(function (b1, b2) {
                 if (b2[1] == b1[1]) {
                     return b2[0] - b1[0];
@@ -355,9 +356,13 @@
              * @param currentGroupPosition the position of the occupied slots in the current group of blocks with same size
              * @param currentGroupPositions the positions already reached in the current group of blocks with same size
              *         it's an array of array
+             * @param stopTime the epoch time where we must stop the calculation
              * @return the position requiring the lowest vertical space
              */
-            function addNextBlock(position, blocks, currentGroupPositions, currentGroupPosition) {
+            function addNextBlock(position, blocks, currentGroupPositions, currentGroupPosition, stopTime) {
+                if((new Date()).getTime() > stopTime) {
+                    return null;
+                }
                 var bestResult = null;
                 var block = blocks[0];
 
@@ -428,7 +433,9 @@
                     ],
                     blocksList,
                     [],
-                    []);
+                    [],
+                    (new Date()).getTime() + settings.maxTime
+                );
             }
 
             var position = bestFit(blockList);

@@ -1,6 +1,7 @@
 # jQuery CompactWall
 
-CompactWall is jQuery plugin that will pack a set of blocks to use the minimum vertical space.
+CompactWall is a packing jQuery plugin that will organize a set of blocks to use the minimum vertical space,
+for example a set of pictures on an image wall.
 
 It is a variation of the [masonry](http://masonry.desandro.com/) plugin to be used the vertical space is more important
 than keeping the blocks ordered.
@@ -18,12 +19,19 @@ A more detailed documentation and some example can be found [here](http://archil
 
     $(function(){
       $('#container').compactWall({
-        blockSelector: '.block'
+        $('.block')
       });
     });
 
 Note that the blocks should have a know size to be reorganized, for example if you use images in your block you have
 to specify their size in the css.
+
+# Parameters
+
+To be passed in a hash as the second argument.
+
+- containerWidth: the width of the container to pack the blocks in, default is the inner width of the object the plugin is called on
+- maxTime: the number of milliseconds before the calculation stops, will avoid using too much time when the number of combinations is too high, default is 100ms.
 
 # License
 
