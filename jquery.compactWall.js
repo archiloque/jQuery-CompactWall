@@ -1,5 +1,5 @@
 /**
- * jQuery CompactWall v0.1.0
+ * jQuery CompactWall v0.2.0
  * A jQuery plugin to organizes blocks in a compact way.
  * http://github.com/archiloque/compact-wall
  *
@@ -53,38 +53,40 @@
 
             var settings = $.extend({
                 'containerWidth':$(container).innerWidth(),
-                'maxTime': 100
+                'maxTime':100
             }, options);
 
             var blockList = [];
-            for (var k = 0; k < blocks.length; k++) {
-                var blockJ = $(blocks[k]);
-                blockList.push([
-                    blockJ.outerHeight(true),
-                    blockJ.outerWidth(true),
-                    blockJ,
-                    -1
-                ]);
-            }
-
-            // sort the blocks by width then height
-            blockList = blockList.sort(function (b1, b2) {
-                if (b2[1] == b1[1]) {
-                    return b2[0] - b1[0];
-                } else {
-                    return b2[1] - b1[1];
+            {
+                for (var k = 0; k < blocks.length; k++) {
+                    var blockJ = $(blocks[k]);
+                    blockList.push([
+                        blockJ.outerHeight(true),
+                        blockJ.outerWidth(true),
+                        blockJ,
+                        -1
+                    ]);
                 }
-            });
 
-            // find identical blocks
-            for (k = 1; k < blockList.length; k++) {
-                if ((blockList[k][0] == blockList[k - 1][0]) && (blockList[k][1] == blockList[k - 1][1])) {
-                    if (blockList[k - 1][3] == -1) {
-                        blockList[k - 1][3] = 0;
-                        blockList[k][3] = 1;
-
+                // sort the blocks by width then height
+                blockList = blockList.sort(function (b1, b2) {
+                    if (b2[1] == b1[1]) {
+                        return b2[0] - b1[0];
                     } else {
-                        blockList[k][3] = blockList[k - 1][3] + 1;
+                        return b2[1] - b1[1];
+                    }
+                });
+
+                // find identical blocks
+                for (k = 1; k < blockList.length; k++) {
+                    if ((blockList[k][0] == blockList[k - 1][0]) && (blockList[k][1] == blockList[k - 1][1])) {
+                        if (blockList[k - 1][3] == -1) {
+                            blockList[k - 1][3] = 0;
+                            blockList[k][3] = 1;
+
+                        } else {
+                            blockList[k][3] = blockList[k - 1][3] + 1;
+                        }
                     }
                 }
             }
@@ -92,7 +94,7 @@
             var minBlockWidth = blockList[blockList.length - 1][1];
             var containerWidth = settings.containerWidth;
             var maxHeight = Number.POSITIVE_INFINITY;
-
+            var timeout = false;
 
             function sameHeightSameWidth(slots, slotIndex) {
                 // block is the same than the slot, just drop the slot
@@ -356,11 +358,10 @@
              * @param currentGroupPosition the position of the occupied slots in the current group of blocks with same size
              * @param currentGroupPositions the positions already reached in the current group of blocks with same size
              *         it's an array of array
-             * @param stopTime the epoch time where we must stop the calculation
              * @return the position requiring the lowest vertical space
              */
-            function addNextBlock(position, blocks, currentGroupPositions, currentGroupPosition, stopTime) {
-                if((new Date()).getTime() > stopTime) {
+            function addNextBlock(position, blocks, currentGroupPositions, currentGroupPosition) {
+                if (timeout) {
                     return null;
                 }
                 var bestResult = null;
@@ -372,7 +373,7 @@
                 // we iterate from end to beginning since the slots are
                 // sorted from the left
                 // so we have a chance to put it higher
-                for (var slotIndex = (position[0].length - 1); slotIndex >= 0; slotIndex--) {
+                for (var slotIndex = (position[0].length - 1); (!timeout) && slotIndex >= 0; slotIndex--) {
                     var slot = position[0][slotIndex];
                     // check if the slot is large enough
                     // and if it's not too high
@@ -423,6 +424,11 @@
             }
 
             function bestFit(blocksList) {
+                if (settings.maxTime != -1) {
+                    window.setTimeout(function () {
+                        timeout = true;
+                    }, settings.maxTime);
+                }
                 return addNextBlock(
                     [
                         [
@@ -433,8 +439,7 @@
                     ],
                     blocksList,
                     [],
-                    [],
-                    (new Date()).getTime() + settings.maxTime
+                    []
                 );
             }
 
