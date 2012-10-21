@@ -361,9 +361,6 @@
              * @return the position requiring the lowest vertical space
              */
             function addNextBlock(position, blocks, currentGroupPositions, currentGroupPosition) {
-                if ((timeout != -1) && (Date.now() > timeout)) {
-                    return null;
-                }
                 var bestResult = null;
                 var block = blocks[0];
 
@@ -373,7 +370,7 @@
                 // we iterate from end to beginning since the slots are
                 // sorted from the left
                 // so we have a chance to put it higher
-                for (var slotIndex = (position[0].length - 1); (!timeout) && slotIndex >= 0; slotIndex--) {
+                for (var slotIndex = (position[0].length - 1); slotIndex >= 0; slotIndex--) {
                     var slot = position[0][slotIndex];
                     // check if the slot is large enough
                     // and if it's not too high
@@ -416,6 +413,9 @@
 
                             if (candidate && (candidate[2] <= maxHeight)) {
                                 bestResult = candidate;
+                                if ((timeout != -1) && (Date.now() > timeout)) {
+                                    return bestResult;
+                                }
                             }
                         }
                     }
