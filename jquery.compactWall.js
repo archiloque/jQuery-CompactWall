@@ -94,7 +94,7 @@
             var minBlockWidth = blockList[blockList.length - 1][1];
             var containerWidth = settings.containerWidth;
             var maxHeight = Number.POSITIVE_INFINITY;
-            var timeout = false;
+            var timeout = -1;
 
             function sameHeightSameWidth(slots, slotIndex) {
                 // block is the same than the slot, just drop the slot
@@ -361,7 +361,7 @@
              * @return the position requiring the lowest vertical space
              */
             function addNextBlock(position, blocks, currentGroupPositions, currentGroupPosition) {
-                if (timeout) {
+                if ((timeout != -1) && (Date.now() > timeout)) {
                     return null;
                 }
                 var bestResult = null;
@@ -425,9 +425,7 @@
 
             function bestFit(blocksList) {
                 if (settings.maxTime != -1) {
-                    window.setTimeout(function () {
-                        timeout = true;
-                    }, settings.maxTime);
+                    timeout = Date.now() + settings.maxTime;
                 }
                 return addNextBlock(
                     [
